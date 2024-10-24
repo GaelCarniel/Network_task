@@ -1,73 +1,70 @@
+from psychopy import visual, core, event
 import numpy as np
 import networkx as nx
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 
-def draw_square_around_node(ax, pos, node_index, x_range, y_range, size=0.1):
-    """
-    Draws a square around the specified node index in the graph.
+def init():
+    # Create the adjacency matrix
+    adj_matrix = np.array([[0, 1, 1, 0, 0, 1, 1],
+                           [1, 0, 1, 0, 0, 0, 0],
+                           [1, 1, 0, 1, 0, 0, 1],
+                           [0, 0, 1, 0, 1, 0, 1],
+                           [0, 0, 0, 1, 0, 1, 1],
+                           [1, 0, 0, 0, 1, 0, 1],
+                           [1, 0, 1, 1, 1, 1, 0]]);
+    return adj_matrix 
 
-    Parameters:
-        ax: The axes to draw on.
-        pos: Dictionary of node positions.
-        node_index: Index of the node to draw the square around.
-        size: Size of the square.
-    """
-    x, y = pos[node_index]
-    square = Rectangle((x - size*x_range / 2, y - size*y_range / 2), size*x_range, size*y_range, linewidth=5, edgecolor='green', facecolor='none')
-    ax.add_patch(square)
+def square_the_node(ax, pos, node_index, x_range, y_range, size=0.1):
+    x, y = pos[node_index];
+    square = Rectangle((x - size*x_range / 2, y - size*y_range / 2), size*x_range, size*y_range, linewidth=5, edgecolor='green', facecolor='none');
+    ax.add_patch(square);
 
-# Create the adjacency matrix
-adj_matrix = np.array([[0, 1, 1, 0, 0, 1, 1],
-                       [1, 0, 1, 0, 0, 0, 0],
-                       [1, 1, 0, 1, 0, 0, 1],
-                       [0, 0, 1, 0, 1, 0, 1],
-                       [0, 0, 0, 1, 0, 1, 1],
-                       [1, 0, 0, 0, 1, 0, 1],
-                       [1, 0, 1, 1, 1, 1, 0]])
+def generate_network(adj_mat, node_index, uncover = [0], private_signal = [0, 0, 1, 0, 1, 0, 1],colours=['#cab79a','blue','yellow'],seed_value = 28,outputname="current_network.png"):
+    '''Create a .png containing the appropriate graph'''
+    if uncover == 'clear':
+        uncover = [0,1,2,3,4,5,6];
 
-# Create a graph from the adjacency matrix
-G = nx.from_numpy_array(adj_matrix)
+    G = nx.from_numpy_array(adj_mat);
 
-# Define the private signal vector
-private_signal = [0, 0, 1, 0, 1, 0, 1]
-
-# Map the private signal to colors: 0 -> blue, 1 -> yellow
-node_colors = ['blue' if signal == 0 else 'yellow' for signal in private_signal]
+    #Create white network
+    node_colors = [colours[0]]*len(private_signal);
+    node_edge_colors = ['green'] + ['black']*(len(private_signal)-1);
 
 
-# Fix the seed for reproducibility in the layout
-seed_value = 28
-pos = nx.spring_layout(G, k=1.25, seed=seed_value)  # Use 'seed' parameter
+    #Apply colors on uncover part
+    for i in range(len(node_colors)):
+        if i in uncover:
+            node_colors[i] = colours[private_signal[i]+1];
 
-# Create the network plot
-fig, ax = plt.subplots(figsize=(8, 8))
-#plt.figure(figsize=(8, 8))
-#ax = plt.gca()  # Get the current axis
+    pos = nx.spring_layout(G, k=1.25, seed=seed_value);
+    
+    #Create the figure
+    fig, ax = plt.subplots(figsize=(8, 8));
+    ax.margins(x=0.1, y=0.1)
 
-nx.draw(G, pos,
-         node_color=node_colors,
-         node_size=2500,  # Customize node size (adjust as needed)
-         width=3,        # Customize edge width (adjust as needed)
-         with_labels=False, # Remove labels
-         ax=ax,
-        linewidths=3,
-        edgecolors="black")
-# Print current axis limits and aspect ratio
-x_limits = ax.get_xlim()
-y_limits = ax.get_ylim()
-x_range = x_limits[1] - x_limits[0]
-y_range = y_limits[1] - y_limits[0]
-print(f"x limits: {x_limits}, y limits: {y_limits}")
-print(f"x range: {x_range}, y range: {y_range}")
-print(f"Aspect ratio (y/x): {y_range / x_range}")
+    nx.draw(G, pos,
+            node_color=node_colors,
+            node_size=2500,
+            width=3,
+            with_labels=False,
+            ax=ax,
+            linewidths=[5]+ [3]*(len(private_signal)-1),
+            edgecolors=node_edge_colors);
 
-# Draw a circle around node number 3 (index 2 since it's zero-indexed)
-draw_square_around_node(ax, pos, node_index=2, x_range=x_range, y_range=y_range,size=0.2)  # Adjust radius as needed
+    # Cast the square in the right plane and draws it
+    x_limits = ax.get_xlim()
+    y_limits = ax.get_ylim()
+    x_range = x_limits[1] - x_limits[0]
+    y_range = y_limits[1] - y_limits[0]
 
+    for n in node_index:
+        square_the_node(ax, pos, n, x_range=x_range, y_range=y_range,size=0.2)
 
 
-# Save the figure with a transparent background
-#plt.title("Network")
-plt.savefig("current_network.png", transparent=True)  # Save with transparent background
-plt.close()  # Close the plot
+    # Save the figure
+    plt.savefig(outputname, transparent=True)  # Save with transparent background
+    plt.close()
+

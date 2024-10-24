@@ -1,19 +1,41 @@
-from psychopy import visual, core, event
+from Generate_network import *
 
-win = visual.Window(units='pix', fullscr=True, color='black');
+win = visual.Window(units='pix', fullscr=True, color='#c6a36d');
 
-text = visual.TextStim(win, text="Welcome to this experiment!", color='#f5f5f5', height=0.1*win.size[1], pos=(0, 0.20*win.size[1]),wrapWidth=win.size[0]*0.8);
-text.draw();
+nsize =.8;
+#Initialisation
+adj_matrix = init();
+uncover = [0];
+square = [];
+square_pos = 0;
+
+
+generate_network(adj_matrix, square, uncover);
+network = visual.ImageStim(win=win,image=f"current_network.png", size=(nsize*win.size[1],nsize*win.size[1]), pos=(0,0));
+network.draw();
 win.flip();
+
 while True:
-    keys = event.waitKeys();
+    keys = event.waitKeys(keyList=['left', 'right', 'return', 'escape']);
     if 'escape' in keys:
         break
-    else:
-        input = visual.TextStim(win, text=str(keys), color='#f5f5f5', height=0.08*win.size[1], pos=(0, -0.10*win.size[1]),wrapWidth=win.size[0]*0.8);
-        input.draw();
-    text.draw();
+    elif 'left' in keys:
+        square_pos+=1;
+        square_pos = square_pos%adj_matrix.shape[0];
+    elif 'right' in keys:
+        square_pos-=1;
+        square_pos = square_pos%adj_matrix.shape[0];
+    elif 'return' in keys:
+        uncover.append(square_pos);
+        print(uncover);
+    
+    square = [square_pos];
+    generate_network(adj_matrix, square, uncover);
+    network = visual.ImageStim(win=win,image=f"current_network.png", size=(nsize*win.size[1],nsize*win.size[1]) ,pos=(0,0));
+    network.draw();
     win.flip();
+    
+
     
     '''
     Presentation réseau blanc: 
