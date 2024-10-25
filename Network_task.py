@@ -11,7 +11,7 @@ square_pos = 0;
 
 
 generate_network(adj_matrix, square, uncover);
-network = visual.ImageStim(win=win,image=f"current_network.png", size=(nsize*win.size[1],nsize*win.size[1]), pos=(0,0));
+network = visual.ImageStim(win=win,image=f"current_network.png", size=None, pos=(0,0)); #Controling the size diminish the quality size=(nsize*win.size[1],nsize*win.size[1])
 network.draw();
 win.flip();
 
@@ -31,7 +31,7 @@ while True:
     
     square = [square_pos];
     generate_network(adj_matrix, square, uncover);
-    network = visual.ImageStim(win=win,image=f"current_network.png", size=(nsize*win.size[1],nsize*win.size[1]) ,pos=(0,0));
+    network = visual.ImageStim(win=win,image=f"current_network.png", size=None ,pos=(0,0)); #Controling the size diminish the quality size=(nsize*win.size[1],nsize*win.size[1])
     network.draw();
     win.flip();
     
