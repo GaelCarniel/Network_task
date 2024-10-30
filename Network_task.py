@@ -2,6 +2,7 @@ from Generate_network import *
 
 #Constant
 n_networks=5;
+p=0.7;
 
 win = visual.Window(units='pix', fullscr=True, color='#c6a36d');
 
@@ -16,8 +17,8 @@ for n in range(n_networks):
     else:
         adj_matrix, private_signal, objects = init(win);
 
-    print(adj_matrix);
-    print(private_signal);
+    #print(adj_matrix);
+    #print(private_signal);
     uncover = [0];
     square = [];
 
@@ -51,13 +52,21 @@ for n in range(n_networks):
         if 'escape' in keys:
             break
         else:
+            rn = np.random.uniform();
+            #print(rn);
             x1 = pos[square[0]][0];
             x2 = pos[square[1]][0];
             if 'left' in keys:
                 if x1<x2:
-                    selected = square[0];
+                    if rn<p:
+                        selected = square[0];
+                    else:
+                        selected = square[1];
                 else:
-                    selected = square[1];
+                    if rn<p:
+                        selected = square[1];
+                    else:
+                        selected = square[0];
             elif 'right' in keys:
                 if x1>x2:
                     selected = square[0];
